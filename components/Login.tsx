@@ -12,9 +12,8 @@ interface LoginProps {
 const USER_DATABASE: Record<string, string> = {
   // "Access Code" : "Display Name / ID"
   "Tara!972nl": "Robert Mear",
-  "Analyst0!2s": "Guest",
-  "guest-view": "Guest Viewer",
-  "gemini2025": "Demo User" // Default for testing
+  "Guest778!27!4": "Guest",
+ 
 };
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
