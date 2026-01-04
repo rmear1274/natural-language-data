@@ -1,0 +1,5 @@
+{
+  "name": "Natural Language Data Analytics Suite",
+  "description": "A 'Code Interpreter' style application where users execute data analysis on CSV files using natural language, powered by Gemini.",
+  "requestFramePermissions": []
+}
