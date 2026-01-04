@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import FileUpload from './components/FileUpload';
 import ChatInterface from './components/ChatInterface';
+import Login from './components/Login';
 import { AppState, DataRow, SchemaSummary } from './types';
 import { parseCSV } from './utils/csv';
 import { Sparkles } from 'lucide-react';
 
 const App: React.FC = () => {
-  const [appState, setAppState] = useState<AppState>(AppState.UPLOAD);
+  const [appState, setAppState] = useState<AppState>(AppState.AUTH);
   const [data, setData] = useState<DataRow[]>([]);
   const [schema, setSchema] = useState<SchemaSummary | null>(null);
+  const [currentUser, setCurrentUser] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleFileSelect = async (file: File) => {
@@ -33,10 +35,23 @@ const App: React.FC = () => {
     setSchema(null);
   };
 
+  const handleLogin = (userId: string) => {
+    setCurrentUser(userId);
+    setAppState(AppState.UPLOAD);
+  };
+
+  if (appState === AppState.AUTH) {
+    return <Login onLogin={handleLogin} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#f3f4f6]">
       {appState === AppState.UPLOAD ? (
         <div className="flex flex-col items-center justify-center min-h-screen px-4">
+          <div className="absolute top-6 right-6 text-sm text-gray-500 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200">
+            Logged in as: <span className="font-semibold text-gray-700">{currentUser}</span>
+          </div>
+
           <div className="text-center mb-10 max-w-2xl">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 text-white mb-6 shadow-lg">
               <Sparkles size={32} />
@@ -74,6 +89,7 @@ const App: React.FC = () => {
         <ChatInterface 
           schema={schema!} 
           data={data} 
+          currentUser={currentUser}
           onBack={handleBack} 
         />
       )}

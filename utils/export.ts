@@ -1,6 +1,6 @@
 import { AnalysisResponse } from '../types';
 
-export const generateHtmlReport = (query: string, analysis: AnalysisResponse): string => {
+export const generateHtmlReport = (query: string, analysis: AnalysisResponse, generatedBy: string = 'Unknown User'): string => {
   const date = new Date().toLocaleString();
   
   const auditRows = analysis.audit_log.map(log => 
@@ -162,6 +162,10 @@ export const generateHtmlReport = (query: string, analysis: AnalysisResponse): s
           ${date}
         </div>
         <div>
+          <span class="block font-medium text-gray-700">Analyst / User</span>
+          ${generatedBy}
+        </div>
+        <div class="col-span-2">
           <span class="block font-medium text-gray-700">Query</span>
           "${query}"
         </div>

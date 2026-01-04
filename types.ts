@@ -45,6 +45,7 @@ export interface ChatMessage {
 }
 
 export enum AppState {
+  AUTH = 'AUTH',
   UPLOAD = 'UPLOAD',
   ANALYSIS = 'ANALYSIS',
 }

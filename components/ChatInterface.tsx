@@ -11,10 +11,11 @@ import { generateHtmlReport, downloadFile } from '../utils/export';
 interface ChatInterfaceProps {
   schema: SchemaSummary;
   data: DataRow[];
+  currentUser: string;
   onBack: () => void;
 }
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ schema, data, onBack }) => {
+const ChatInterface: React.FC<ChatInterfaceProps> = ({ schema, data, currentUser, onBack }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -125,7 +126,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ schema, data, onBack }) =
 
   const handleExportReport = (analysis: AnalysisResponse, queryMsg: ChatMessage) => {
     // Generate HTML report instead of Markdown
-    const report = generateHtmlReport(queryMsg.content as string, analysis);
+    const report = generateHtmlReport(queryMsg.content as string, analysis, currentUser);
     downloadFile(report, `analysis_report_${Date.now()}.html`, 'text/html');
   };
 
@@ -262,12 +263,18 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ schema, data, onBack }) =
              {data.length} rows &bull; {schema.fields.length} columns &bull; Gemini 2.5 Flash
           </p>
         </div>
-        <button 
-          onClick={onBack}
-          className="text-sm text-gray-500 hover:text-gray-800 px-3 py-1 rounded-md hover:bg-gray-100 transition-colors"
-        >
-          Upload New File
-        </button>
+        <div className="flex items-center gap-4">
+          <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200 flex items-center gap-2">
+             <div className="w-2 h-2 rounded-full bg-green-500"></div>
+             {currentUser}
+          </div>
+          <button 
+            onClick={onBack}
+            className="text-sm text-gray-500 hover:text-gray-800 px-3 py-1 rounded-md hover:bg-gray-100 transition-colors"
+          >
+            Upload New File
+          </button>
+        </div>
       </header>
 
       {/* Main Chat Area */}
