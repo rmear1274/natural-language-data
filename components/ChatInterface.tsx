@@ -66,8 +66,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ schema, data, currentUser
         executionResult = executeCode(analysis.code, data);
         
         if (executionResult) {
-          // Check if result is a Chart Configuration
-          if (typeof executionResult === 'object' && !Array.isArray(executionResult) && (executionResult.chartType || executionResult.type)) {
+          const isObj = typeof executionResult === 'object' && executionResult !== null;
+          const isArray = Array.isArray(executionResult);
+
+          // Case A: Chart Configuration
+          if (isObj && !isArray && (executionResult.chartType || executionResult.type)) {
              // Normalize 'type' to 'chartType' to handle potential inconsistencies from LLM
              const isChart = executionResult.chartType || executionResult.type;
              
@@ -81,12 +84,33 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ schema, data, currentUser
                // If data is missing but we have a chart config, this is an error
                if (!vizData || !Array.isArray(vizData)) {
                  console.warn("Chart configuration detected but data is missing or invalid.");
+               } else {
+                 // CRITICAL FIX: If we have valid chart data, ALSO show it as a table.
+                 // This ensures metrics like "Percentage" (which might not be plotted) are visible.
+                 tableData = vizData;
                }
              }
           } 
-          // Check if result is Tabular Data (Array of Objects)
-          else if (Array.isArray(executionResult) && executionResult.length > 0) {
+          // Case B: Tabular Data (Direct Array of Objects)
+          else if (isArray && executionResult.length > 0) {
              tableData = executionResult;
+          }
+          // Case C: Composite Object (Dictionary containing arrays or scalars)
+          // e.g. { top_3: [...], total: 100 }
+          else if (isObj && !isArray) {
+             // 1. Search for the most significant array to display as a table
+             const entries = Object.entries(executionResult);
+             const arrayCandidate = entries.find(([_, val]) => Array.isArray(val) && val.length > 0 && typeof val[0] === 'object');
+             
+             if (arrayCandidate) {
+               tableData = arrayCandidate[1];
+             } else {
+               // 2. If no array found, check if it's a flat object of scalars (Single Row Summary)
+               const isFlat = entries.every(([_, val]) => typeof val !== 'object' || val === null);
+               if (isFlat && entries.length > 0) {
+                 tableData = [executionResult];
+               }
+             }
           }
         }
       } catch (execError) {
@@ -212,9 +236,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ schema, data, currentUser
           <ReactMarkdown>{response.final_summary}</ReactMarkdown>
         </div>
 
-        {/* Tabular Data Result */}
-        {response.table_data && renderDataTable(response.table_data)}
-
         {/* Visualizations */}
         {response.chart_config && (
            (!response.chart_config.data || response.chart_config.data.length === 0) ? (
@@ -226,6 +247,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ schema, data, currentUser
              <DataViz data={response.chart_config.data} config={response.chart_config} />
            )
         )}
+
+        {/* Tabular Data Result (Always show if available, even if chart exists) */}
+        {response.table_data && renderDataTable(response.table_data)}
 
         {/* Audit Log */}
         <AuditLog logs={response.audit_log} />

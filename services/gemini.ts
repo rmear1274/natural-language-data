@@ -29,9 +29,10 @@ The actual data is available in the execution environment as a variable named \`
    - The code MUST end with a \`return\` statement.
    - If the result is a number or string, return it directly.
    - If the result is a table/list, return an Array of Objects.
-   - If the user asks for a plot/chart, you MUST return a configuration object containing the processed data:
+   - If the user asks for a plot/chart, OR if the data represents a ranking, distribution, comparison, or trend that would be better visualized, you SHOULD return a configuration object containing the processed data:
      \`return { chartType: 'bar'|'line'|'scatter'|'pie', xKey: 'columnName', dataKeys: ['col1', 'col2'], data: processedArray, title: 'Chart Title' };\`
    - IMPORTANT: You MUST include the \`data\` property in the returned object. Do not rely on 'dataset' global.
+   - Any calculated metrics (like percentages, totals) should be included as fields in the \`data\` objects so they appear in the results table, even if not used in the chart.
 4. **Structured Output:** You must output your response in valid JSON format.
 
 ### OUTPUT SCHEMA:
